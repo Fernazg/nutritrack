@@ -20,6 +20,7 @@ npm run dev      # http://localhost:3000
 npm run build    # compilación de producción
 npm run lint
 npm test         # pruebas unitarias (Vitest)
+npm run test:e2e -- .e2e http://localhost:3123   # prueba de punta a punta (Edge, iPhone)
 ```
 
 ## Estructura
