@@ -23,6 +23,7 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
   gramos con atajos (porción del envase, 50/100/150/200 g).
 - **Escáner de código de barras** con la cámara (ZXing) + ingreso manual del código.
 - **Repetir comida del día anterior** en un toque.
+- **Comidas personalizadas**: guarda una comida completa (2+ alimentos) como favorito y regístrala en un toque.
 - **Colación** como quinta comida.
 - **Estadísticas**: últimos 7 días (barras), promedio, días registrados, días cerca de la meta,
   comparación con la semana anterior, proteína promedio, reparto de macros, cambio de peso 7/30 días.
@@ -52,9 +53,11 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
   actividad, normalizador de Open Food Facts y **migración de la base v1 → v3** (los datos
   existentes en el iPhone se conservan).
 - **Extremo a extremo** (Edge headless emulando iPhone 390 px, compilación de producción):
-  20/20 OK en modo claro (2 corridas) y 20/20 en modo oscuro. Cubre perfil, agua, manual,
-  recientes, favoritos, código de barras real (Colun 7802920000084), búsqueda en línea,
-  estadísticas, actividad, sugerencias y que la tarjeta de IA quede oculta sin configuración.
+  22/22 OK en la versión final (local), 20/20 en modo oscuro y 20/20 contra producción
+  (https://nutritrack-zeta.vercel.app). Cubre perfil, agua, manual, recientes, favoritos,
+  comidas personalizadas, código de barras real (Colun 7802920000084), búsqueda en línea,
+  estadísticas, actividad, sugerencias (visibles y ocultas al superar la meta) y que la
+  tarjeta de IA quede oculta sin configuración.
 - **API de IA**: sin configurar → 503; token incorrecto → 401; datos inválidos → 400;
   clave falsa → 502 controlado. **No se probó una respuesta real** (no hay clave).
 - `tsc`, `eslint` y `next build` sin errores.
@@ -87,7 +90,7 @@ código de terceros fuera de dependencias npm revisadas.
 
 - Análisis de **fotos de comida** y **etiquetas** con IA (requiere configurar la clave gratuita; ver `docs/IA.md`).
 - **Planificación** de menú semanal y recetas.
-- **Comidas personalizadas** (recetas con varios ingredientes guardadas como una sola).
+- Recetas con porciones (hoy una comida guardada se registra completa, sin dividir en porciones).
 - Base de alimentos genéricos (frutas, verduras, preparaciones caseras) con datos verificables
   (p. ej. USDA FoodData Central, dominio público) — hoy dependen de Open Food Facts o carga manual.
 - Micronutrientes (fibra, sodio, azúcares) en el registro.

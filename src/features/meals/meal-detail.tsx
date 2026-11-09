@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Copy, Plus, Utensils } from "lucide-react";
+import { Bookmark, ChevronRight, Copy, Plus, Utensils } from "lucide-react";
 import { Card, SectionTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,11 +17,13 @@ import { SCAN_MODES } from "@/features/scanner/scan-modes";
 import { AddFoodSheet } from "@/features/foods/add-food-sheet";
 import type { FoodEntry, MealType } from "@/types/nutrition";
 import { FoodEntrySheet } from "./food-entry-sheet";
+import { SaveMealSheet } from "./save-meal-sheet";
 
 type Editing =
   | { kind: "search" }
   | { kind: "manual"; name: string }
   | { kind: "edit"; entry: FoodEntry }
+  | { kind: "save" }
   | null;
 
 export function MealDetail({ meal }: { meal: MealType }) {
@@ -87,7 +89,21 @@ export function MealDetail({ meal }: { meal: MealType }) {
       )}
 
       <section>
-        <SectionTitle>Alimentos</SectionTitle>
+        <SectionTitle
+          action={
+            entries && entries.length >= 2 ? (
+              <button
+                type="button"
+                onClick={() => setEditing({ kind: "save" })}
+                className="flex items-center gap-1 text-[14px] font-medium text-accent"
+              >
+                <Bookmark className="size-4" /> Guardar comida
+              </button>
+            ) : undefined
+          }
+        >
+          Alimentos
+        </SectionTitle>
         <Card className="p-0">
           {entries && entries.length > 0 ? (
             <ul className="divide-y divide-border">
@@ -145,6 +161,13 @@ export function MealDetail({ meal }: { meal: MealType }) {
           meal={meal}
           onClose={() => setEditing(null)}
           onCreateManual={(name) => setEditing({ kind: "manual", name })}
+        />
+      )}
+      {editing?.kind === "save" && entries && (
+        <SaveMealSheet
+          entries={entries}
+          defaultName={`${config.label} habitual`}
+          onClose={() => setEditing(null)}
         />
       )}
       {(editing?.kind === "manual" || editing?.kind === "edit") && date && (
