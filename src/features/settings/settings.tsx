@@ -134,7 +134,7 @@ export function Settings() {
       <AiSettings />
 
       <Group title="Acerca de">
-        <Row icon={Info} label="Versión" value="0.4.0" />
+        <Row icon={Info} label="Versión" value="0.4.1" />
       </Group>
 
       <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={handleFile} />

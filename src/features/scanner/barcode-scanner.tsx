@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, Keyboard, Loader2 } from "lucide-react";
+import { Camera, CameraOff, ImageIcon, Keyboard, Loader2 } from "lucide-react";
 import { Sheet, SheetAction } from "@/components/ui/sheet";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { PageHeader } from "@/components/ui/page-header";
@@ -11,11 +11,13 @@ import type { FoodCandidate } from "@/lib/nutrition/portion";
 import { lookupBarcode } from "@/features/foods/api";
 import { PortionForm } from "@/features/foods/portion-form";
 import { FoodEntrySheet } from "@/features/meals/food-entry-sheet";
+import { imageDataFromFile, startScanLoop } from "./camera";
 
 type Status =
   | { kind: "idle" }
   | { kind: "starting" }
   | { kind: "scanning" }
+  | { kind: "reading" }
   | { kind: "looking"; code: string }
   | { kind: "found"; food: FoodCandidate }
   | { kind: "not_found"; code: string }
@@ -24,8 +26,9 @@ type Status =
 const FORM_ID = "barcode-portion";
 
 /**
- * Camera barcode scanner (EAN/UPC) using ZXing, with manual code entry as a
- * fallback. Products are looked up in Open Food Facts through our API.
+ * Barcode scanner (EAN/UPC): live camera, a still photo, or typing the code.
+ * Decoding uses zxing-cpp (WebAssembly). Products are looked up in Open Food
+ * Facts through our API.
  */
 export function BarcodeScanner() {
   const today = useToday();
@@ -34,6 +37,8 @@ export function BarcodeScanner() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [manualCode, setManualCode] = useState("");
   const [manualFor, setManualFor] = useState<string | null>(null);
+
+  const photoRef = useRef<HTMLInputElement>(null);
 
   const stopCamera = useCallback(() => {
     controlsRef.current?.stop();
@@ -53,31 +58,33 @@ export function BarcodeScanner() {
   }, []);
 
   async function startCamera() {
-    if (!videoRef.current) return;
+    const video = videoRef.current;
+    if (!video) return;
     setStatus({ kind: "starting" });
     try {
-      const { BrowserMultiFormatReader } = await import("@zxing/browser");
-      const { BarcodeFormat, DecodeHintType } = await import("@zxing/library");
-      const hints = new Map();
-      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.EAN_8,
-        BarcodeFormat.UPC_A,
-        BarcodeFormat.UPC_E,
-      ]);
-      const reader = new BrowserMultiFormatReader(hints);
-      controlsRef.current = await reader.decodeFromConstraints(
-        { video: { facingMode: { ideal: "environment" } }, audio: false },
-        videoRef.current,
-        (result) => {
-          if (!result) return;
-          stopCamera();
-          navigator.vibrate?.(40);
-          void lookup(result.getText());
+      // Ask for the camera first, while still close to the tap (iOS is strict).
+      // High resolution: thin EAN bars need pixels. Browsers fall back if unsupported.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
         },
-      );
+      });
+      const { warmUpDecoder } = await import("./decoder");
+      warmUpDecoder();
+      const stop = startScanLoop(video, stream, (code) => {
+        stopCamera();
+        navigator.vibrate?.(40);
+        void lookup(code);
+      });
+      controlsRef.current = { stop };
+      video.srcObject = stream;
+      await video.play();
       setStatus({ kind: "scanning" });
     } catch (err) {
+      console.error("camera", err);
       stopCamera();
       const denied = err instanceof DOMException && (err.name === "NotAllowedError" || err.name === "SecurityError");
       setStatus({
@@ -86,6 +93,30 @@ export function BarcodeScanner() {
           ? "No hay permiso para usar la cámara. Actívalo en Ajustes › Safari › Cámara, o ingresa el código a mano."
           : "No se pudo iniciar la cámara. Puedes ingresar el código a mano.",
       });
+    }
+  }
+
+  /** Fallback: the native iOS camera focuses better than a live web stream. */
+  async function decodePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    stopCamera();
+    setStatus({ kind: "reading" });
+    try {
+      const { decodeImage } = await import("./decoder");
+      const code = await decodeImage(await imageDataFromFile(file));
+      if (code) {
+        navigator.vibrate?.(40);
+        void lookup(code);
+      } else {
+        setStatus({
+          kind: "error",
+          message: "No encontré un código en la foto. Acércate hasta que las barras se vean nítidas y llenen la foto a lo ancho, o escribe los números.",
+        });
+      }
+    } catch {
+      setStatus({ kind: "error", message: "No se pudo leer la foto. Intenta otra vez o escribe el código." });
     }
   }
 
@@ -112,7 +143,7 @@ export function BarcodeScanner() {
           muted
           className={cameraOn ? "absolute inset-0 size-full object-cover" : "hidden"}
         />
-        <div className="absolute top-1/2 left-1/2 h-28 w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-2xl border-2 border-white/80">
+        <div className="absolute top-1/2 left-1/2 h-[45%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-2xl border-2 border-white/80">
           {status.kind === "scanning" && (
             <div className="absolute inset-x-4 top-1/2 h-0.5 -translate-y-1/2 animate-pulse rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" />
           )}
@@ -143,7 +174,14 @@ export function BarcodeScanner() {
 
       <div aria-live="polite">
         {status.kind === "starting" && <Notice>Iniciando cámara…</Notice>}
-        {status.kind === "scanning" && <Notice>Centra el código dentro del recuadro.</Notice>}
+        {status.kind === "scanning" && (
+          <Notice>Centra las barras en el recuadro, a unos 15 cm, con buena luz.</Notice>
+        )}
+        {status.kind === "reading" && (
+          <Notice>
+            <Loader2 className="size-4 animate-spin" /> Leyendo la foto…
+          </Notice>
+        )}
         {status.kind === "looking" && (
           <Notice>
             <Loader2 className="size-4 animate-spin" /> Buscando {status.code}…
@@ -171,6 +209,28 @@ export function BarcodeScanner() {
             {status.message}
           </div>
         )}
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => photoRef.current?.click()}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface py-3 text-[15px] font-medium active:bg-surface-2"
+        >
+          <ImageIcon className="size-5 text-accent" /> Tomar foto del código
+        </button>
+        <p className="mt-1.5 px-1 text-center text-[12px] text-muted">
+          Si la cámara en vivo no lo lee, una foto suele funcionar mejor.
+        </p>
+        <input
+          ref={photoRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          aria-label="Foto del código de barras"
+          onChange={decodePhoto}
+        />
       </div>
 
       <form onSubmit={submitManual}>

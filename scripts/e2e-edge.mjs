@@ -155,8 +155,10 @@ try {
   check("favoritos lista el alimento marcado", (await text()).includes("Pollo asado"));
   await click("Cancelar");
 
-  // 8b. Custom meal (comida personalizada)
-  await nav("/diario/almuerzo");
+  // 8b. Custom meal (comida personalizada). Use a meal the scanner did not
+  // fill: scanned products go to the meal of the current hour (11–16 h = almuerzo).
+  const h = new Date().getHours();
+  await nav(h >= 11 && h < 16 ? "/diario/desayuno" : "/diario/almuerzo");
   await click("Agregar alimento");
   await clickContaining("[role=dialog] li button", "Pollo asado");
   await submitForm("#portion-form");
