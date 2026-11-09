@@ -4,24 +4,25 @@ import { useState } from "react";
 import { Sheet, SheetAction } from "@/components/ui/sheet";
 import { DangerButton, Field, FieldGroup, TextRow } from "@/components/ui/field";
 import { MACRO_META } from "@/components/ui/macro-bar";
-import { addFoodEntry, deleteFoodEntry, updateFoodEntry } from "@/lib/db/repository";
-import { MEALS } from "@/lib/nutrition/meals";
+import { deleteFoodEntry, logFood, updateFoodEntry } from "@/lib/db/repository";
 import { kcalFromMacros, parseNumber, round1, toInputValue } from "@/lib/parse";
-import { cn } from "@/lib/utils";
 import type { FoodEntry, MealType } from "@/types/nutrition";
+import { MealPicker } from "./meal-picker";
 
 interface FoodEntrySheetProps {
   date: string;
   meal: MealType;
   /** When present the sheet edits this entry; otherwise it creates one. */
   entry?: FoodEntry;
+  /** Prefill for a new entry (e.g. the search text). */
+  initialName?: string;
   onClose: () => void;
 }
 
 const FORM_ID = "food-entry-form";
 
-export function FoodEntrySheet({ date, meal: initialMeal, entry, onClose }: FoodEntrySheetProps) {
-  const [name, setName] = useState(entry?.name ?? "");
+export function FoodEntrySheet({ date, meal: initialMeal, entry, initialName, onClose }: FoodEntrySheetProps) {
+  const [name, setName] = useState(entry?.name ?? initialName ?? "");
   const [quantity, setQuantity] = useState(entry?.quantity ?? "");
   const [meal, setMeal] = useState<MealType>(entry?.meal ?? initialMeal);
   const [calories, setCalories] = useState(toInputValue(entry?.calories));
@@ -61,7 +62,12 @@ export function FoodEntrySheet({ date, meal: initialMeal, entry, onClose }: Food
     };
     try {
       if (entry?.id !== undefined) await updateFoodEntry(entry.id, data);
-      else await addFoodEntry(data);
+      else
+        await logFood(data, {
+          name: data.name,
+          serving: { calories: data.calories, protein: data.protein, carbs: data.carbs, fat: data.fat },
+          servingLabel: data.quantity,
+        });
       onClose();
     } catch {
       setError("No se pudo guardar. Inténtalo de nuevo.");
@@ -111,23 +117,7 @@ export function FoodEntrySheet({ date, meal: initialMeal, entry, onClose }: Food
           />
         </FieldGroup>
 
-        <div className="grid grid-cols-4 gap-1 rounded-2xl bg-surface-2 p-1" role="radiogroup" aria-label="Comida">
-          {MEALS.map((m) => (
-            <button
-              key={m.type}
-              type="button"
-              role="radio"
-              aria-checked={meal === m.type}
-              onClick={() => setMeal(m.type)}
-              className={cn(
-                "rounded-xl py-2 text-[13px] font-medium transition-colors",
-                meal === m.type ? "bg-surface shadow-sm" : "text-muted",
-              )}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+        <MealPicker value={meal} onChange={setMeal} />
 
         <div>
           <FieldGroup>

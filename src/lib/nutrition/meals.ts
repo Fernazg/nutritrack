@@ -1,4 +1,4 @@
-import { Coffee, Moon, Sun, Sunset, type LucideIcon } from "lucide-react";
+import { Apple, Coffee, Moon, Sun, Sunset, type LucideIcon } from "lucide-react";
 import type { MealType } from "@/types/nutrition";
 
 export interface MealConfig {
@@ -13,6 +13,7 @@ export const MEALS: readonly MealConfig[] = [
   { type: "almuerzo", label: "Almuerzo", hint: "Comida principal", icon: Sun },
   { type: "once", label: "Once", hint: "Media tarde", icon: Sunset },
   { type: "cena", label: "Cena", hint: "Cierra el día", icon: Moon },
+  { type: "colacion", label: "Colación", hint: "Snacks entre comidas", icon: Apple },
 ] as const;
 
 export function getMeal(type: string): MealConfig | undefined {

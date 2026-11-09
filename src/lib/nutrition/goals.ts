@@ -5,4 +5,5 @@ export const DEFAULT_GOALS: Goals = {
   protein: 140,
   carbs: 210,
   fat: 65,
+  waterMl: 2500,
 };
