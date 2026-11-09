@@ -1,5 +1,6 @@
 import "server-only";
 import type { NutritionTotals } from "@/types/nutrition";
+import { looksLiquid, type LabelExtras } from "@/lib/nutrition/chile-seals";
 
 /**
  * Open Food Facts client (free, open data under ODbL — attribution required).
@@ -7,7 +8,7 @@ import type { NutritionTotals } from "@/types/nutrition";
  * They ask for a descriptive User-Agent and moderate request rates.
  */
 const USER_AGENT = "NutriTrack/0.3 (uso personal; https://github.com/Fernazg/nutritrack)";
-const FIELDS = "code,product_name,product_name_es,brands,nutriments,serving_quantity,serving_size";
+const FIELDS = "code,product_name,product_name_es,brands,nutriments,serving_quantity,serving_size,quantity";
 const TIMEOUT_MS = 8000;
 
 export interface OffFood {
@@ -17,6 +18,8 @@ export interface OffFood {
   per100g: NutritionTotals;
   servingGrams?: number;
   servingLabel?: string;
+  extras?: LabelExtras;
+  isLiquid?: boolean;
 }
 
 interface OffNutriments {
@@ -26,6 +29,9 @@ interface OffNutriments {
   proteins_100g?: number;
   carbohydrates_100g?: number;
   fat_100g?: number;
+  sugars_100g?: number;
+  "saturated-fat_100g"?: number;
+  sodium_100g?: number; // grams
 }
 
 interface OffProduct {
@@ -36,6 +42,7 @@ interface OffProduct {
   nutriments?: OffNutriments;
   serving_quantity?: number | string;
   serving_size?: string;
+  quantity?: string;
 }
 
 const num = (v: unknown): number | undefined => {
@@ -66,6 +73,20 @@ export function normalizeProduct(p: OffProduct): OffFood | null {
     },
     servingGrams: serving && serving > 0 && serving < 2000 ? serving : undefined,
     servingLabel: p.serving_size?.trim() || undefined,
+    extras: extrasOf(n),
+    isLiquid: looksLiquid(p.serving_size, p.quantity),
+  };
+}
+
+function extrasOf(n: OffNutriments): LabelExtras | undefined {
+  const sugars = num(n.sugars_100g);
+  const saturatedFat = num(n["saturated-fat_100g"]);
+  const sodium = num(n.sodium_100g);
+  if (sugars === undefined && saturatedFat === undefined && sodium === undefined) return undefined;
+  return {
+    sugars: sugars !== undefined ? r1(sugars) : undefined,
+    saturatedFat: saturatedFat !== undefined ? r1(saturatedFat) : undefined,
+    sodiumMg: sodium !== undefined ? Math.round(sodium * 1000) : undefined,
   };
 }
 

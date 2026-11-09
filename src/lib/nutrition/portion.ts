@@ -1,4 +1,5 @@
 import type { EntrySource, FoodItem, NutritionTotals } from "@/types/nutrition";
+import type { LabelExtras } from "./chile-seals";
 
 /** Anything that can be logged: a saved food, a search hit or a scanned product. */
 export interface FoodCandidate {
@@ -12,6 +13,9 @@ export interface FoodCandidate {
   servingGrams?: number;
   lastGrams?: number;
   favorite?: boolean;
+  /** Per-100 label data from Open Food Facts (not persisted). */
+  extras?: LabelExtras;
+  isLiquid?: boolean;
   source: EntrySource;
 }
 
@@ -25,6 +29,7 @@ export function candidateFromItem(item: FoodItem): FoodCandidate {
     serving: item.serving,
     servingLabel: item.servingLabel,
     lastGrams: item.lastGrams,
+    isLiquid: item.isLiquid,
     favorite: item.favorite === 1,
     source: item.source,
   };
@@ -61,7 +66,7 @@ export function nutritionFor(c: FoodCandidate, amount: number): NutritionTotals 
 
 /** Human label for what was eaten, e.g. "150 g" or "2 porciones". */
 export function amountLabel(c: FoodCandidate, amount: number): string {
-  if (isByWeight(c)) return `${r1(amount)} g`.replace(".", ",");
+  if (isByWeight(c)) return `${r1(amount)} ${c.isLiquid ? "ml" : "g"}`.replace(".", ",");
   const n = `${r1(amount)}`.replace(".", ",");
   const unit = c.servingLabel ? ` × ${c.servingLabel}` : amount === 1 ? " porción" : " porciones";
   return `${n}${unit}`;

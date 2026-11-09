@@ -42,3 +42,9 @@ describe("amountLabel", () => {
     expect(amountLabel(sandwich, 2)).toBe("2 porciones");
   });
 });
+
+describe("amountLabel for liquids", () => {
+  it("uses ml when the product is a liquid", () => {
+    expect(amountLabel({ ...milk, isLiquid: true }, 200)).toBe("200 ml");
+  });
+});

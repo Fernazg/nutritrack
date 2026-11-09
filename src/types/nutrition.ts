@@ -40,6 +40,8 @@ export interface FoodItem {
   per100g?: NutritionTotals;
   serving?: NutritionTotals;
   servingLabel?: string;
+  /** Measured in ml instead of g (from the product label). */
+  isLiquid?: boolean;
   /** Last grams used, to prefill next time. */
   lastGrams?: number;
   favorite: 0 | 1;

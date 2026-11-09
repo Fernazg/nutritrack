@@ -22,6 +22,8 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
 - **Buscador de alimentos**: recientes, favoritos (★), búsqueda en **Open Food Facts**, porciones en
   gramos con atajos (porción del envase, 50/100/150/200 g).
 - **Escáner de código de barras** con la cámara (ZXing) + ingreso manual del código.
+- **Evaluación de etiquetas**: azúcares, grasas saturadas y sodio por 100 g/ml, con referencia a los
+  sellos «ALTO EN» de la Ley 20.606 (límites de sólidos y líquidos). Los líquidos se miden en ml.
 - **Repetir comida del día anterior** en un toque.
 - **Comidas personalizadas**: guarda una comida completa (2+ alimentos) como favorito y regístrala en un toque.
 - **Colación** como quinta comida.
@@ -49,13 +51,13 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
 
 ## 5. Pruebas ejecutadas (resultados reales)
 
-- **Unitarias (Vitest)**: 35/35 OK — motor energético, porciones, estadísticas, sugerencias,
-  actividad, normalizador de Open Food Facts y **migración de la base v1 → v3** (los datos
+- **Unitarias (Vitest)**: 41/41 OK — motor energético, porciones, estadísticas, sugerencias,
+  actividad, sellos de etiqueta, normalizador de Open Food Facts y **migración de la base v1 → v3** (los datos
   existentes en el iPhone se conservan).
 - **Extremo a extremo** (Edge headless emulando iPhone 390 px, compilación de producción):
-  22/22 OK en la versión final (local), 20/20 en modo oscuro y 20/20 contra producción
-  (https://nutritrack-zeta.vercel.app). Cubre perfil, agua, manual, recientes, favoritos,
-  comidas personalizadas, código de barras real (Colun 7802920000084), búsqueda en línea,
+  23/23 OK en la versión final (local), 20/20 en modo oscuro y contra producción en versiones
+  previas de la noche. Cubre perfil, agua, manual, recientes, favoritos, comidas personalizadas,
+  código de barras real (Colun 7802920000084) con su etiqueta, búsqueda en línea,
   estadísticas, actividad, sugerencias (visibles y ocultas al superar la meta) y que la
   tarjeta de IA quede oculta sin configuración.
 - **API de IA**: sin configurar → 503; token incorrecto → 401; datos inválidos → 400;
@@ -64,7 +66,7 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
 
 ## 6. Arquitectura
 
-- `lib/nutrition/*`: lógica pura y testeada (energy, portion, stats, suggest, activity).
+- `lib/nutrition/*`: lógica pura y testeada (energy, portion, stats, suggest, activity, chile-seals).
 - `lib/db`: Dexie **v3** (tablas `foods`, `waterEntries`, `exerciseEntries`); migración automática,
   los datos existentes se conservan. Toda escritura pasa por `repository.ts`.
 - `lib/server/*`: código solo de servidor (`server-only`): Open Food Facts y proveedor de IA.

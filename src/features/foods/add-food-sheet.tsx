@@ -216,7 +216,7 @@ function FoodList({
                   <span className="truncate">{c.name}</span>
                 </p>
                 <p className="truncate text-[12px] text-muted">
-                  {[c.brand, c.per100g ? "por 100 g" : c.servingLabel || "1 porción"].filter(Boolean).join(" · ")}
+                  {[c.brand, c.per100g ? (c.isLiquid ? "por 100 ml" : "por 100 g") : c.servingLabel || "1 porción"].filter(Boolean).join(" · ")}
                 </p>
               </div>
               {base && (

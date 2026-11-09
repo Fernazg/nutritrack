@@ -10,6 +10,7 @@ import { amountLabel, defaultAmount, isByWeight, nutritionFor, type FoodCandidat
 import { cn, formatNumber } from "@/lib/utils";
 import type { MealType } from "@/types/nutrition";
 import { MealPicker } from "@/features/meals/meal-picker";
+import { LabelInfo } from "./label-info";
 
 interface PortionFormProps {
   food: FoodCandidate;
@@ -22,6 +23,7 @@ interface PortionFormProps {
 /** Choose how much was eaten and log it. Submitted via the sheet's "Agregar" button. */
 export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: PortionFormProps) {
   const byWeight = isByWeight(food);
+  const u = food.isLiquid ? "ml" : "g";
   const [amount, setAmount] = useState(toInputValue(defaultAmount(food)));
   const [meal, setMeal] = useState<MealType>(initialMeal);
   const [fav, setFav] = useState(!!food.favorite);
@@ -34,11 +36,11 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
 
   const chips = byWeight
     ? [
-        ...(food.servingGrams ? [{ label: `1 porción · ${formatNumber(food.servingGrams)} g`, v: food.servingGrams }] : []),
-        { label: "50 g", v: 50 },
-        { label: "100 g", v: 100 },
-        { label: "150 g", v: 150 },
-        { label: "200 g", v: 200 },
+        ...(food.servingGrams ? [{ label: `1 porción · ${formatNumber(food.servingGrams)} ${u}`, v: food.servingGrams }] : []),
+        { label: `50 ${u}`, v: 50 },
+        { label: `100 ${u}`, v: 100 },
+        { label: `150 ${u}`, v: 150 },
+        { label: `200 ${u}`, v: 200 },
       ]
     : [0.5, 1, 1.5, 2].map((v) => ({ label: `${toInputValue(v)}×`, v }));
 
@@ -46,7 +48,7 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
     e.preventDefault();
     if (saving) return;
     if (!valid || n === null) {
-      setError(byWeight ? "Ingresa una cantidad válida en gramos." : "Ingresa un número de porciones válido.");
+      setError(byWeight ? `Ingresa una cantidad válida en ${food.isLiquid ? "mililitros" : "gramos"}.` : "Ingresa un número de porciones válido.");
       return;
     }
     setSaving(true);
@@ -68,6 +70,7 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
           per100g: food.per100g,
           serving: food.serving,
           servingLabel: food.servingLabel,
+          isLiquid: food.isLiquid,
           lastGrams: byWeight ? n : undefined,
         },
       );
@@ -87,7 +90,7 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
           {food.brand && <p className="text-[14px] text-muted">{food.brand}</p>}
           <p className="mt-1 text-[12px] text-muted">
             {food.per100g
-              ? `${formatNumber(food.per100g.calories)} kcal por 100 g`
+              ? `${formatNumber(food.per100g.calories)} kcal por 100 ${u}`
               : food.serving
                 ? `${formatNumber(food.serving.calories)} kcal por porción`
                 : ""}
@@ -110,7 +113,7 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
         <FieldGroup>
           <Field
             label={byWeight ? "Cantidad" : "Porciones"}
-            unit={byWeight ? "g" : "×"}
+            unit={byWeight ? u : "×"}
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ""))}
@@ -141,6 +144,10 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
         <Stat value={formatNumber(totals.carbs, totals.carbs % 1 ? 1 : 0)} label="Carb." color={MACRO_META.carbs.color} />
         <Stat value={formatNumber(totals.fat, totals.fat % 1 ? 1 : 0)} label="Grasa" color={MACRO_META.fat.color} />
       </div>
+
+      {food.extras && food.per100g && (
+        <LabelInfo kcalPer100={food.per100g.calories} extras={food.extras} isLiquid={!!food.isLiquid} />
+      )}
 
       <MealPicker value={meal} onChange={setMeal} />
 

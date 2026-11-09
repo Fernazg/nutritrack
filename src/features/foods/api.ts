@@ -2,6 +2,7 @@
 
 import type { FoodCandidate } from "@/lib/nutrition/portion";
 import type { NutritionTotals } from "@/types/nutrition";
+import type { LabelExtras } from "@/lib/nutrition/chile-seals";
 
 /** Shape returned by our /api/alimentos routes (see lib/server/openfoodfacts). */
 interface ApiFood {
@@ -11,6 +12,8 @@ interface ApiFood {
   per100g: NutritionTotals;
   servingGrams?: number;
   servingLabel?: string;
+  extras?: LabelExtras;
+  isLiquid?: boolean;
 }
 
 const toCandidate = (f: ApiFood, source: FoodCandidate["source"]): FoodCandidate => ({ ...f, source });
