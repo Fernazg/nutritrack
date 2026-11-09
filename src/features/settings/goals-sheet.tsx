@@ -81,7 +81,7 @@ export function GoalsSheet({ goals, onClose }: { goals: Goals; onClose: () => vo
             <Field label="Grasas" unit="g" dot={MACRO_META.fat.color} inputMode="decimal"
               value={fat} onChange={(e) => setFat(clean(e.target.value))} />
           </FieldGroup>
-          <p className={cn("mt-2 px-4 text-[13px]", mismatch ? "text-carbs" : "text-muted")}>
+          <p className={cn("mt-2 px-4 text-[13px]", mismatch ? "text-carbs-ink" : "text-muted")}>
             Tus macros suman {formatNumber(macroKcal)} kcal
             {mismatch && ` (${diff > 0 ? "+" : ""}${formatNumber(diff)} respecto a tu meta)`}.
           </p>

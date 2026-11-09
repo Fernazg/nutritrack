@@ -18,6 +18,9 @@
   --protein: #2563eb;
   --carbs: #f59e0b;
   --fat: #ec4899;
+  /* text-safe variants (WCAG AA on white) */
+  --carbs-ink: #b45309;
+  --fat-ink: #be185d;
   --danger: #dc2626;
   --on-accent: #ffffff;
 }
@@ -36,6 +39,8 @@
     --protein: #60a5fa;
     --carbs: #fbbf24;
     --fat: #f472b6;
+    --carbs-ink: #fbbf24;
+    --fat-ink: #f472b6;
     --danger: #f87171;
     /* light accents in dark mode need dark text for WCAG contrast */
     --on-accent: #06150d;
@@ -55,6 +60,8 @@
   --color-protein: var(--protein);
   --color-carbs: var(--carbs);
   --color-fat: var(--fat);
+  --color-carbs-ink: var(--carbs-ink);
+  --color-fat-ink: var(--fat-ink);
   --color-danger: var(--danger);
   --color-on-accent: var(--on-accent);
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;

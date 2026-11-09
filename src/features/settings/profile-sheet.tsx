@@ -166,7 +166,7 @@ export function ProfileSheet({ profile, goals, lastWeightKg, today, onClose }: P
               <Row k="Agua" v={`${formatLiters(plan.goals.waterMl)} L`} />
             </dl>
             {plan.warnings.map((wn) => (
-              <p key={wn} className="mt-3 flex gap-2 text-[13px] text-carbs">
+              <p key={wn} className="mt-3 flex gap-2 text-[13px] text-carbs-ink">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" /> {WARNING_TEXT[wn]}
               </p>
             ))}

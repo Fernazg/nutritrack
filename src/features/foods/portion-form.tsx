@@ -141,8 +141,8 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
       <div className="grid grid-cols-4 gap-2 rounded-2xl border border-border bg-surface p-3 text-center">
         <Stat value={formatNumber(totals.calories)} label="kcal" />
         <Stat value={formatNumber(totals.protein, totals.protein % 1 ? 1 : 0)} label="Prot." color={MACRO_META.protein.color} />
-        <Stat value={formatNumber(totals.carbs, totals.carbs % 1 ? 1 : 0)} label="Carb." color={MACRO_META.carbs.color} />
-        <Stat value={formatNumber(totals.fat, totals.fat % 1 ? 1 : 0)} label="Grasa" color={MACRO_META.fat.color} />
+        <Stat value={formatNumber(totals.carbs, totals.carbs % 1 ? 1 : 0)} label="Carb." color={MACRO_META.carbs.ink} />
+        <Stat value={formatNumber(totals.fat, totals.fat % 1 ? 1 : 0)} label="Grasa" color={MACRO_META.fat.ink} />
       </div>
 
       {food.extras && food.per100g && (

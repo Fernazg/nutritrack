@@ -55,8 +55,8 @@ export function Diary() {
       <Card className="grid grid-cols-4 gap-2 p-4 text-center">
         <Total label="kcal" value={totals.calories} goal={goals.calories} />
         <Total label="Prot." value={totals.protein} goal={goals.protein} color="var(--protein)" />
-        <Total label="Carb." value={totals.carbs} goal={goals.carbs} color="var(--carbs)" />
-        <Total label="Grasa" value={totals.fat} goal={goals.fat} color="var(--fat)" />
+        <Total label="Carb." value={totals.carbs} goal={goals.carbs} color="var(--carbs-ink)" />
+        <Total label="Grasa" value={totals.fat} goal={goals.fat} color="var(--fat-ink)" />
       </Card>
 
       <MealSummaryList

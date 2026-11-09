@@ -2,10 +2,11 @@ import { formatNumber } from "@/lib/utils";
 
 export type MacroKey = "protein" | "carbs" | "fat";
 
-export const MACRO_META: Record<MacroKey, { label: string; color: string }> = {
-  protein: { label: "Proteínas", color: "var(--protein)" },
-  carbs: { label: "Carbos", color: "var(--carbs)" },
-  fat: { label: "Grasas", color: "var(--fat)" },
+/** `color` for fills/dots; `ink` for text (meets contrast on surfaces). */
+export const MACRO_META: Record<MacroKey, { label: string; color: string; ink: string }> = {
+  protein: { label: "Proteínas", color: "var(--protein)", ink: "var(--protein)" },
+  carbs: { label: "Carbos", color: "var(--carbs)", ink: "var(--carbs-ink)" },
+  fat: { label: "Grasas", color: "var(--fat)", ink: "var(--fat-ink)" },
 };
 
 interface MacroBarProps {

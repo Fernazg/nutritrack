@@ -45,7 +45,9 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
 
 - `new Date()` en render de un componente cliente rompía el prerender de Next 16 → condicionado a la fecha del cliente.
 - Formato de litros mostraba "0,50 L" → nuevo `formatLiters` ("0,5 L").
-- Contraste insuficiente de botones (ver punto 1).
+- Contraste insuficiente de botones (ver punto 1) y de números de carbohidratos/grasas
+  (nuevos tonos de texto `--carbs-ink` y `--fat-ink`, ≥ 5:1 sobre blanco).
+- Productos líquidos se mostraban en gramos → ahora en ml (porción, atajos y cantidad guardada).
 - El buscador clásico de Open Food Facts devolvía "temporarily unavailable" → se usa Search-a-licious.
 - Un `id` de campo con tildes generaba selectores inválidos (corregido antes, mantenido).
 
@@ -55,8 +57,7 @@ Producción: https://nutritrack-zeta.vercel.app · Repo: https://github.com/Fern
   actividad, sellos de etiqueta, normalizador de Open Food Facts y **migración de la base v1 → v3** (los datos
   existentes en el iPhone se conservan).
 - **Extremo a extremo** (Edge headless emulando iPhone 390 px, compilación de producción):
-  23/23 OK en la versión final (local), 20/20 en modo oscuro y contra producción en versiones
-  previas de la noche. Cubre perfil, agua, manual, recientes, favoritos, comidas personalizadas,
+  23/23 OK en la versión final, en modo claro y oscuro (local) y contra producción. Cubre perfil, agua, manual, recientes, favoritos, comidas personalizadas,
   código de barras real (Colun 7802920000084) con su etiqueta, búsqueda en línea,
   estadísticas, actividad, sugerencias (visibles y ocultas al superar la meta) y que la
   tarjeta de IA quede oculta sin configuración.
@@ -97,8 +98,6 @@ código de terceros fuera de dependencias npm revisadas.
   (p. ej. USDA FoodData Central, dominio público) — hoy dependen de Open Food Facts o carga manual.
 - Micronutrientes (fibra, sodio, azúcares) en el registro.
 - Gráfico de peso con tendencia suavizada y vista mensual de calorías.
-- Algunos números de macros usan colores (ámbar) con contraste bajo sobre blanco; el texto
-  adyacente los identifica, pero conviene revisarlos.
 
 ## 10. Recomendaciones
 
