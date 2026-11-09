@@ -19,3 +19,12 @@ export const MEALS: readonly MealConfig[] = [
 export function getMeal(type: string): MealConfig | undefined {
   return MEALS.find((m) => m.type === type);
 }
+
+/** Suggested meal for the current hour (Chilean schedule). */
+export function mealForHour(hour: number): MealConfig["type"] {
+  if (hour >= 5 && hour < 11) return "desayuno";
+  if (hour >= 11 && hour < 16) return "almuerzo";
+  if (hour >= 16 && hour < 20) return "once";
+  if (hour >= 20 || hour < 2) return "cena";
+  return "colacion";
+}

@@ -115,7 +115,11 @@ export async function copyMeal(fromDate: string, toDate: string, meal: FoodEntry
   const source = await db.foodEntries.where("[date+meal]").equals([fromDate, meal]).toArray();
   const now = Date.now();
   await db.foodEntries.bulkAdd(
-    source.map(({ id: _id, ...e }, i) => ({ ...e, date: toDate, createdAt: now + i })),
+    source.map((e, i) => {
+      const copy: FoodEntry = { ...e, date: toDate, createdAt: now + i };
+      delete copy.id; // let IndexedDB assign new ids
+      return copy;
+    }),
   );
   return source.length;
 }

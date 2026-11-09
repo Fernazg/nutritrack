@@ -11,6 +11,7 @@ import { formatNumber } from "@/lib/utils";
 import type { WeightEntry } from "@/types/nutrition";
 import { WeightChart } from "./weight-chart";
 import { WeightSheet } from "./weight-sheet";
+import { WeeklyStats } from "./weekly-stats";
 
 type Editing = { kind: "new" } | { kind: "edit"; entry: WeightEntry } | null;
 
@@ -66,8 +67,10 @@ export function Progress() {
         </p>
       )}
 
+      {today && <WeeklyStats today={today} goals={goals} />}
+
       <section>
-        <SectionTitle>Evolución</SectionTitle>
+        <SectionTitle>Evolución del peso</SectionTitle>
         <Card>
           {weights && weights.length >= 2 ? (
             <WeightChart entries={weights} targetKg={goals.targetWeightKg} />

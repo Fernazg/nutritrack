@@ -18,6 +18,7 @@ export function GoalsSheet({ goals, onClose }: { goals: Goals; onClose: () => vo
   const [carbs, setCarbs] = useState(toInputValue(goals.carbs));
   const [fat, setFat] = useState(toInputValue(goals.fat));
   const [target, setTarget] = useState(toInputValue(goals.targetWeightKg));
+  const [water, setWater] = useState(toInputValue((goals.waterMl ?? 2500) / 1000));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,11 +27,13 @@ export function GoalsSheet({ goals, onClose }: { goals: Goals; onClose: () => vo
   const c = parseNumber(carbs);
   const f = parseNumber(fat);
   const t = parseNumber(target);
+  const wl = parseNumber(water);
 
   const valid =
     kcal !== null && kcal >= 500 && kcal <= 10000 &&
     p !== null && p >= 0 && c !== null && c >= 0 && f !== null && f >= 0 &&
-    (target.trim() === "" || (t !== null && t >= 20 && t <= 400));
+    (target.trim() === "" || (t !== null && t >= 20 && t <= 400)) &&
+    wl !== null && wl >= 0.5 && wl <= 8;
 
   const macroKcal = kcalFromMacros(p ?? 0, c ?? 0, f ?? 0);
   const diff = kcal !== null ? macroKcal - kcal : 0;
@@ -47,6 +50,7 @@ export function GoalsSheet({ goals, onClose }: { goals: Goals; onClose: () => vo
         carbs: round1(c),
         fat: round1(f),
         targetWeightKg: t !== null && target.trim() !== "" ? round1(t) : undefined,
+        waterMl: Math.round((wl ?? 2.5) * 1000),
       });
       onClose();
     } catch {
@@ -87,6 +91,8 @@ export function GoalsSheet({ goals, onClose }: { goals: Goals; onClose: () => vo
           <FieldGroup>
             <Field label="Peso objetivo" unit="kg" inputMode="decimal" placeholder="Opcional"
               value={target} onChange={(e) => setTarget(clean(e.target.value))} />
+            <Field label="Agua" unit="L" inputMode="decimal"
+              value={water} onChange={(e) => setWater(clean(e.target.value))} />
           </FieldGroup>
         </div>
 
