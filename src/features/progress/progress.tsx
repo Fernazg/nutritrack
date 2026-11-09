@@ -12,6 +12,7 @@ import type { WeightEntry } from "@/types/nutrition";
 import { WeightChart } from "./weight-chart";
 import { WeightSheet } from "./weight-sheet";
 import { WeeklyStats } from "./weekly-stats";
+import { weightChange } from "@/lib/nutrition/stats";
 
 type Editing = { kind: "new" } | { kind: "edit"; entry: WeightEntry } | null;
 
@@ -24,6 +25,9 @@ export function Progress() {
   const first = weights?.[0];
   const last = weights?.at(-1);
   const change = first && last && weights.length > 1 ? last.weightKg - first.weightKg : null;
+  const change7 = weights ? weightChange(weights, 7) : null;
+  const change30 = weights ? weightChange(weights, 30) : null;
+  const fmtChange = (c: number) => `${c > 0 ? "+" : ""}${formatNumber(c, 1)} kg`;
   const toGoal =
     last && goals.targetWeightKg ? last.weightKg - goals.targetWeightKg : null;
 
@@ -59,6 +63,16 @@ export function Progress() {
           icon={Target}
         />
       </div>
+      {(change7 !== null || change30 !== null) && (
+        <div className="-mt-3 flex gap-2 px-1 text-[13px]">
+          {change7 !== null && (
+            <span className="rounded-full bg-surface-2 px-3 py-1">7 días: <span className="tabular font-semibold">{fmtChange(change7)}</span></span>
+          )}
+          {change30 !== null && (
+            <span className="rounded-full bg-surface-2 px-3 py-1">30 días: <span className="tabular font-semibold">{fmtChange(change30)}</span></span>
+          )}
+        </div>
+      )}
       {toGoal !== null && (
         <p className="-mt-3 px-1 text-[13px] text-muted">
           {Math.abs(toGoal) < 0.05

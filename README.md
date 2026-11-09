@@ -8,6 +8,9 @@ PWA personal de nutrición, optimizada para iPhone. Sin cuentas: todos los datos
 - Tailwind CSS 4
 - Dexie (IndexedDB) para almacenamiento local
 - lucide-react para íconos
+- @zxing/browser para leer códigos de barras
+- Open Food Facts (datos abiertos, ODbL) para productos envasados
+- Vitest para pruebas unitarias
 
 ## Desarrollo
 
@@ -16,6 +19,7 @@ npm install
 npm run dev      # http://localhost:3000
 npm run build    # compilación de producción
 npm run lint
+npm test         # pruebas unitarias (Vitest)
 ```
 
 ## Estructura
@@ -28,12 +32,13 @@ src/
     layout/            Navegación inferior
     pwa/               Service worker e ícono
     ui/                Componentes reutilizables (Card, Sheet, Field…)
+  app/api/             Rutas del backend: /alimentos (Open Food Facts) e /ia (opcional)
   features/            Módulos por funcionalidad
-    dashboard/  meals/  progress/  scanner/  settings/
+    activity/  ai/  dashboard/  foods/  meals/  progress/  scanner/  settings/  water/
   lib/
-    db/                Esquema Dexie, hooks de lectura y repositorio de escritura
-    nutrition/         Comidas, metas por defecto, totales
-    server/            Código solo de servidor (claves API)
+    db/                Esquema Dexie (v3), hooks de lectura y repositorio de escritura
+    nutrition/         Lógica pura y testeada: energía (BMR/TDEE), porciones, estadísticas, actividad
+    server/            Código solo de servidor: Open Food Facts y proveedor de IA
   types/               Tipos del dominio
 ```
 
@@ -44,3 +49,9 @@ Copia `.env.example` a `.env.local`. Las claves API son **solo de servidor**: nu
 ## Despliegue
 
 Conectado a Vercel: cada push a `main` publica una nueva versión automáticamente.
+
+## Documentación
+
+- [docs/INVESTIGACION.md](docs/INVESTIGACION.md): fuentes de los cálculos y decisiones.
+- [docs/IA.md](docs/IA.md): cómo activar la IA gratuita (opcional).
+- [docs/INFORME-NOCTURNO.md](docs/INFORME-NOCTURNO.md): informe de la jornada del 9-nov-2026.

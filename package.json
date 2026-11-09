@@ -1,6 +1,6 @@
 {
   "name": "nutritrack",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -28,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
+    "fake-indexeddb": "^6.2.8",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.7"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { averageLogged, dailyTotals, daysOnTarget, macroEnergySplit } from "./stats";
+import { averageLogged, dailyTotals, daysOnTarget, macroEnergySplit, weightChange } from "./stats";
 import type { FoodEntry } from "@/types/nutrition";
 
 const e = (date: string, calories: number, protein = 0, carbs = 0, fat = 0): FoodEntry => ({
@@ -43,5 +43,22 @@ describe("daysOnTarget", () => {
   it("counts logged days within ±10 % of the goal", () => {
     const days = dailyTotals([e("2026-11-01", 1850), e("2026-11-02", 2500), e("2026-11-03", 2150)], dates);
     expect(daysOnTarget(days, 2000)).toBe(2);
+  });
+});
+
+describe("weightChange", () => {
+  const w = [
+    { date: "2026-10-01", weightKg: 84 },
+    { date: "2026-10-26", weightKg: 82.4 },
+    { date: "2026-11-02", weightKg: 81.5 },
+    { date: "2026-11-09", weightKg: 80.9 },
+  ];
+  it("compares with the latest weigh-in at least N days earlier", () => {
+    expect(weightChange(w, 7)).toBe(-0.6); // vs 2026-11-02
+    expect(weightChange(w, 30)).toBe(-3.1); // vs 2026-10-01
+  });
+  it("returns null without an old enough reference", () => {
+    expect(weightChange(w, 60)).toBeNull();
+    expect(weightChange([w[0]], 7)).toBeNull();
   });
 });

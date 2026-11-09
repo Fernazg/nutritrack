@@ -59,3 +59,22 @@ export function macroEnergySplit(t: NutritionTotals): { protein: number; carbs: 
 export function daysOnTarget(days: readonly DayTotals[], goal: number, tolerance = 0.1): number {
   return days.filter((d) => d.logged && Math.abs(d.calories - goal) <= goal * tolerance).length;
 }
+
+/**
+ * Weight change over the last `days` days: latest weight minus the most
+ * recent weight on or before (latest date − days). null if not enough data.
+ */
+export function weightChange(
+  entries: readonly { date: string; weightKg: number }[],
+  days: number,
+): number | null {
+  if (entries.length < 2) return null;
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const last = sorted[sorted.length - 1];
+  const [y, m, d] = last.date.split("-").map(Number);
+  const cutoff = new Date(y, m - 1, d - days);
+  const cutoffIso = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, "0")}-${String(cutoff.getDate()).padStart(2, "0")}`;
+  const base = [...sorted].reverse().find((e) => e.date <= cutoffIso);
+  if (!base) return null;
+  return Math.round((last.weightKg - base.weightKg) * 10) / 10;
+}
