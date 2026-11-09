@@ -1,6 +1,6 @@
 {
   "name": "nutritrack",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "node scripts/e2e-edge.mjs",
-    "test:e2e:barcode": "node scripts/e2e-barcode.mjs"
+    "test:e2e:barcode": "node scripts/e2e-barcode.mjs",
+    "test:e2e:photo": "node scripts/e2e-photo.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

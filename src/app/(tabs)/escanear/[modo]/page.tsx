@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ScanScreen } from "@/features/scanner/scan-screen";
 import { BarcodeScanner } from "@/features/scanner/barcode-scanner";
+import { MealPhoto } from "@/features/scanner/meal-photo";
 import { SCAN_MODES, getScanMode } from "@/features/scanner/scan-modes";
 
 export function generateStaticParams() {
@@ -25,6 +26,8 @@ async function ScanContent({ params }: { params: Promise<{ modo: string }> }) {
   const { modo } = await params;
   const config = getScanMode(modo);
   if (!config) notFound();
-  // Barcode works today (camera + Open Food Facts); photo/label need AI (pending).
-  return config.mode === "codigo" ? <BarcodeScanner /> : <ScanScreen config={config} />;
+  // Barcode: camera + Open Food Facts. Photo: Gemini (optional, free tier). Label: pending.
+  if (config.mode === "codigo") return <BarcodeScanner />;
+  if (config.mode === "foto") return <MealPhoto title={config.title} description={config.description} />;
+  return <ScanScreen config={config} />;
 }

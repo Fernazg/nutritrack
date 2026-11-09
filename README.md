@@ -23,6 +23,7 @@ npm run lint
 npm test         # pruebas unitarias (Vitest)
 npm run test:e2e -- .e2e http://localhost:3123   # prueba de punta a punta (Edge, iPhone)
 npm run test:e2e:barcode -- .e2e http://localhost:3123   # lector de códigos (cámara falsa + foto)
+npm run test:e2e:photo -- .e2e http://localhost:3123     # foto de comida (IA simulada en el navegador)
 ```
 
 ## Estructura
