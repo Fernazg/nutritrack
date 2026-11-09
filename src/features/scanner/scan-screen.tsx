@@ -36,7 +36,7 @@ export function ScanScreen({ config }: { config: ScanModeConfig }) {
         </div>
         <div className="absolute inset-x-0 bottom-5 flex flex-col items-center gap-2 text-white/70">
           <Icon className="size-5" />
-          <p className="text-[13px]">La cámara estará disponible pronto</p>
+          <p className="px-6 text-center text-[13px]">Requiere un servicio de IA. Quedará activo cuando se configure una clave gratuita.</p>
         </div>
       </div>
 

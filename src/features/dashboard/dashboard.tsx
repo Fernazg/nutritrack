@@ -12,6 +12,9 @@ import { formatNumber } from "@/lib/utils";
 import { MealSummaryList } from "@/features/meals/meal-summary-list";
 import { QuickActions } from "@/features/scanner/quick-actions";
 import { WaterCard } from "@/features/water/water-card";
+import { SuggestionsCard } from "./suggestions-card";
+import { AiIdeasCard } from "@/features/ai/ai-ideas-card";
+import { getMeal, mealForHour } from "@/lib/nutrition/meals";
 
 export function Dashboard() {
   const today = useToday();
@@ -74,6 +77,26 @@ export function Dashboard() {
       </Card>
 
       <WaterCard date={today} goalMl={goals.waterMl ?? 2500} />
+
+      <SuggestionsCard
+        date={today}
+        remaining={{
+          calories: Math.max(goals.calories - totals.calories, 0),
+          protein: proteinLeft,
+          carbs: Math.max(goals.carbs - totals.carbs, 0),
+          fat: Math.max(goals.fat - totals.fat, 0),
+        }}
+      />
+
+      <AiIdeasCard
+        meal={today ? (getMeal(mealForHour(new Date().getHours()))?.label ?? "") : ""}
+        remaining={{
+          calories: Math.max(goals.calories - totals.calories, 0),
+          protein: proteinLeft,
+          carbs: Math.max(goals.carbs - totals.carbs, 0),
+          fat: Math.max(goals.fat - totals.fat, 0),
+        }}
+      />
 
       <section>
         <SectionTitle>Registrar con</SectionTitle>

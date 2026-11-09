@@ -13,6 +13,7 @@ import { clearAll, importAll } from "@/lib/db/repository";
 import { cn, formatLiters, formatNumber } from "@/lib/utils";
 import { GoalsSheet } from "./goals-sheet";
 import { ProfileSheet } from "./profile-sheet";
+import { AiSettings } from "@/features/ai/ai-settings";
 import { exportDataFile } from "./data-actions";
 
 type OpenSheet = "profile" | "goals" | "clear" | "import" | null;
@@ -129,6 +130,8 @@ export function Settings() {
         <Row icon={Upload} label="Restaurar respaldo" onClick={() => fileRef.current?.click()} disabled={busy} />
         <Row icon={Trash2} label="Borrar todos los datos" danger onClick={() => setOpen("clear")} />
       </Group>
+
+      <AiSettings />
 
       <Group title="Acerca de">
         <Row icon={Info} label="Versión" value="0.3.0" />
