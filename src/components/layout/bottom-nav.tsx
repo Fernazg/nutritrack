@@ -61,7 +61,7 @@ export function BottomNav() {
             aria-label="Escanear"
             aria-current={scanActive ? "page" : undefined}
             className={cn(
-              "-mt-5 flex size-14 items-center justify-center rounded-full text-white shadow-lg shadow-accent/30 transition-transform active:scale-95",
+              "-mt-5 flex size-14 items-center justify-center rounded-full text-on-accent shadow-lg shadow-accent/30 transition-transform active:scale-95",
               scanActive ? "bg-accent-strong" : "bg-accent",
             )}
           >

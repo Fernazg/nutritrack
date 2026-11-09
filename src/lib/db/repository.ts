@@ -1,5 +1,6 @@
 import { getDB } from "./database";
 import type {
+  ExerciseEntry,
   FoodEntry,
   FoodItem,
   Goals,
@@ -138,6 +139,17 @@ export async function undoLastWater(date: string) {
   if (last?.id !== undefined) await db.waterEntries.delete(last.id);
 }
 
+// ---- Exercise -----------------------------------------------------------
+
+export async function addExercise(entry: Omit<ExerciseEntry, "id" | "createdAt">) {
+  void requestPersistence();
+  await getDB().exerciseEntries.add({ ...entry, createdAt: Date.now() });
+}
+
+export async function deleteExercise(id: number) {
+  await getDB().exerciseEntries.delete(id);
+}
+
 // ---- Weight -------------------------------------------------------------
 
 /** One weight per day: saving on a date that already has one replaces it. */
@@ -177,16 +189,18 @@ export interface ExportFile {
   foodEntries: FoodEntry[];
   weightEntries: WeightEntry[];
   waterEntries: WaterEntry[];
+  exerciseEntries: ExerciseEntry[];
   foods: FoodItem[];
   settings: SettingRecord[];
 }
 
 export async function exportAll(): Promise<ExportFile> {
   const db = getDB();
-  const [foodEntries, weightEntries, waterEntries, foods, settings] = await Promise.all([
+  const [foodEntries, weightEntries, waterEntries, exerciseEntries, foods, settings] = await Promise.all([
     db.foodEntries.toArray(),
     db.weightEntries.toArray(),
     db.waterEntries.toArray(),
+    db.exerciseEntries.toArray(),
     db.foods.toArray(),
     db.settings.toArray(),
   ]);
@@ -197,6 +211,7 @@ export async function exportAll(): Promise<ExportFile> {
     foodEntries,
     weightEntries,
     waterEntries,
+    exerciseEntries,
     foods,
     settings,
   };
@@ -214,15 +229,17 @@ export async function importAll(raw: unknown): Promise<{ entries: number }> {
   const db = getDB();
   await db.transaction(
     "rw",
-    [db.foodEntries, db.weightEntries, db.waterEntries, db.foods, db.settings],
+    [db.foodEntries, db.weightEntries, db.waterEntries, db.exerciseEntries, db.foods, db.settings],
     async () => {
       await Promise.all([
         db.foodEntries.clear(),
         db.weightEntries.clear(),
         db.waterEntries.clear(),
+        db.exerciseEntries.clear(),
         db.foods.clear(),
         db.settings.clear(),
       ]);
+      await db.exerciseEntries.bulkAdd(data.exerciseEntries ?? []);
       await db.foodEntries.bulkAdd(data.foodEntries ?? []);
       await db.weightEntries.bulkAdd(data.weightEntries ?? []);
       await db.waterEntries.bulkAdd(data.waterEntries ?? []);
@@ -237,12 +254,13 @@ export async function clearAll() {
   const db = getDB();
   await db.transaction(
     "rw",
-    [db.foodEntries, db.weightEntries, db.waterEntries, db.foods, db.settings],
+    [db.foodEntries, db.weightEntries, db.waterEntries, db.exerciseEntries, db.foods, db.settings],
     async () => {
       await Promise.all([
         db.foodEntries.clear(),
         db.weightEntries.clear(),
         db.waterEntries.clear(),
+        db.exerciseEntries.clear(),
         db.foods.clear(),
         db.settings.clear(),
       ]);

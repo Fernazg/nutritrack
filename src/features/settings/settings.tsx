@@ -159,7 +159,7 @@ export function Settings() {
               type="button"
               onClick={handleImport}
               disabled={busy}
-              className="w-full rounded-2xl bg-accent py-3.5 text-[16px] font-semibold text-white disabled:opacity-50"
+              className="w-full rounded-2xl bg-accent py-3.5 text-[16px] font-semibold text-on-accent disabled:opacity-50"
             >
               Restaurar
             </button>

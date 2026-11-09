@@ -12,13 +12,14 @@
   --text: #15181a;
   --muted: #6b7271;
   --border: #e3e6e1;
-  --accent: #1f9d63;
-  --accent-strong: #157a4c;
+  --accent: #157a4c; /* 5.4:1 on white, 4.9:1 on --bg (WCAG AA) */
+  --accent-strong: #0f6640;
   --accent-soft: #e2f4ea;
-  --protein: #3b82f6;
+  --protein: #2563eb;
   --carbs: #f59e0b;
   --fat: #ec4899;
   --danger: #dc2626;
+  --on-accent: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,6 +37,8 @@
     --carbs: #fbbf24;
     --fat: #f472b6;
     --danger: #f87171;
+    /* light accents in dark mode need dark text for WCAG contrast */
+    --on-accent: #06150d;
   }
 }
 
@@ -53,6 +56,7 @@
   --color-carbs: var(--carbs);
   --color-fat: var(--fat);
   --color-danger: var(--danger);
+  --color-on-accent: var(--on-accent);
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
@@ -60,6 +64,7 @@
 @theme {
   --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.32, 0.72, 0, 1);
   --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-page-in: page-in 0.22s ease-out;
 
   @keyframes sheet-up {
     from {
@@ -67,6 +72,17 @@
     }
     to {
       transform: translateY(0);
+    }
+  }
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 
@@ -82,7 +98,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-sheet-up,
-  .animate-fade-in {
+  .animate-fade-in,
+  .animate-page-in {
     animation: none;
   }
 }

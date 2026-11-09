@@ -39,11 +39,11 @@ export function Dashboard() {
 
       {profile === null && (
         <Link href="/ajustes" className="block active:opacity-80">
-          <div className="flex items-center gap-3 rounded-3xl bg-accent p-4 text-white">
+          <div className="flex items-center gap-3 rounded-3xl bg-accent p-4 text-on-accent">
             <Sparkles className="size-5 shrink-0" />
             <div className="flex-1">
               <p className="text-[15px] font-semibold">Personaliza tus metas</p>
-              <p className="text-[13px] text-white/85">Calcula calorías y macros según tu cuerpo y actividad.</p>
+              <p className="text-[13px] text-on-accent/85">Calcula calorías y macros según tu cuerpo y actividad.</p>
             </div>
             <ChevronRight className="size-5 shrink-0" />
           </div>

@@ -42,7 +42,7 @@ export function WaterCard({ date, goalMl }: { date: string | null; goalMl: numbe
           aria-label={`Agregar ${GLASS_ML} ml de agua`}
           disabled={!date}
           onClick={() => date && addWater(date, GLASS_ML)}
-          className="flex h-10 items-center gap-1 rounded-full bg-protein px-3.5 text-[14px] font-semibold text-white active:scale-95 disabled:opacity-50"
+          className="flex h-10 items-center gap-1 rounded-full bg-protein px-3.5 text-[14px] font-semibold text-on-accent active:scale-95 disabled:opacity-50"
         >
           <Plus className="size-4" strokeWidth={2.5} /> 250 ml
         </button>

@@ -36,7 +36,7 @@ export function Progress() {
             type="button"
             disabled={!today}
             onClick={() => setEditing({ kind: "new" })}
-            className="flex items-center gap-1 rounded-full bg-accent px-3.5 py-2 text-[14px] font-semibold text-white active:opacity-80 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-full bg-accent px-3.5 py-2 text-[14px] font-semibold text-on-accent active:opacity-80 disabled:opacity-50"
           >
             <Plus className="size-4" strokeWidth={2.5} />
             Peso

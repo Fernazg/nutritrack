@@ -10,6 +10,7 @@ import { sumTotals } from "@/lib/nutrition/totals";
 import { useSelectedDate, withDate } from "@/lib/use-selected-date";
 import { formatNumber } from "@/lib/utils";
 import { MealSummaryList } from "./meal-summary-list";
+import { ActivitySection } from "@/features/activity/activity-section";
 
 export function Diary() {
   const router = useRouter();
@@ -62,6 +63,8 @@ export function Diary() {
         entries={entries}
         hrefFor={(meal) => withDate(`/diario/${meal}`, date, today)}
       />
+
+      <ActivitySection date={date} />
     </div>
   );
 }

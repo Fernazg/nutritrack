@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
+  ExerciseEntry,
   FoodEntry,
   FoodItem,
   SettingRecord,
@@ -17,6 +18,7 @@ export class NutriTrackDB extends Dexie {
   settings!: EntityTable<SettingRecord, "key">;
   foods!: EntityTable<FoodItem, "key">;
   waterEntries!: EntityTable<WaterEntry, "id">;
+  exerciseEntries!: EntityTable<ExerciseEntry, "id">;
 
   constructor() {
     super("nutritrack");
@@ -30,6 +32,10 @@ export class NutriTrackDB extends Dexie {
       foodEntries: "++id, date, meal, [date+meal], createdAt, foodKey",
       foods: "&key, lastUsed, favorite, barcode",
       waterEntries: "++id, date",
+    });
+    // v3: physical activity log.
+    this.version(3).stores({
+      exerciseEntries: "++id, date",
     });
   }
 }

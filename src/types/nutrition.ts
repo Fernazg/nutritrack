@@ -62,6 +62,18 @@ export interface WaterEntry {
   createdAt: number;
 }
 
+export interface ExerciseEntry {
+  id?: number;
+  date: string;
+  /** ActivityType id (see lib/nutrition/activity). */
+  type: string;
+  label: string;
+  minutes: number;
+  /** Estimated gross kcal at the time of logging. */
+  kcal: number;
+  createdAt: number;
+}
+
 export interface Goals extends NutritionTotals {
   targetWeightKg?: number;
   waterMl?: number;

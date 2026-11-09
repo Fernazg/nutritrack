@@ -157,7 +157,7 @@ export function BarcodeScanner() {
             </p>
             <div className="mt-3 flex gap-2">
               <button type="button" onClick={() => setManualFor(status.code)}
-                className="rounded-full bg-accent px-4 py-2 text-[14px] font-semibold text-white">
+                className="rounded-full bg-accent px-4 py-2 text-[14px] font-semibold text-on-accent">
                 Registrar manualmente
               </button>
               <button type="button" onClick={reset} className="rounded-full px-4 py-2 text-[14px] font-medium text-accent">
@@ -192,7 +192,7 @@ export function BarcodeScanner() {
           <button
             type="submit"
             disabled={manualCode.length < 6}
-            className="rounded-2xl bg-accent px-4 text-[15px] font-semibold text-white disabled:opacity-40"
+            className="rounded-2xl bg-accent px-4 text-[15px] font-semibold text-on-accent disabled:opacity-40"
           >
             Buscar
           </button>

@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDB } from "./database";
 import { DEFAULT_GOALS } from "@/lib/nutrition/goals";
-import type { FoodEntry, FoodItem, Goals, Profile, WaterEntry, WeightEntry } from "@/types/nutrition";
+import type { ExerciseEntry, FoodEntry, FoodItem, Goals, Profile, WaterEntry, WeightEntry } from "@/types/nutrition";
 
 export function useFoodEntries(date: string | null): FoodEntry[] | undefined {
   return useLiveQuery(
@@ -28,6 +28,13 @@ export function useWeightEntries(): WeightEntry[] | undefined {
 export function useWaterEntries(date: string | null): WaterEntry[] | undefined {
   return useLiveQuery(
     () => (date ? getDB().waterEntries.where("date").equals(date).toArray() : []),
+    [date],
+  );
+}
+
+export function useExerciseEntries(date: string | null): ExerciseEntry[] | undefined {
+  return useLiveQuery(
+    () => (date ? getDB().exerciseEntries.where("date").equals(date).sortBy("createdAt") : []),
     [date],
   );
 }

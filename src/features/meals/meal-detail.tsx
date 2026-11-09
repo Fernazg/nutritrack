@@ -64,7 +64,7 @@ export function MealDetail({ meal }: { meal: MealType }) {
         type="button"
         disabled={!date}
         onClick={() => setEditing({ kind: "search" })}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent py-4 text-[16px] font-semibold text-white shadow-sm shadow-accent/20 active:scale-[0.99] active:opacity-90 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent py-4 text-[16px] font-semibold text-on-accent shadow-sm shadow-accent/20 active:scale-[0.99] active:opacity-90 disabled:opacity-50"
       >
         <Plus className="size-5" strokeWidth={2.5} /> Agregar alimento
       </button>
