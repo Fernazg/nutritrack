@@ -36,7 +36,7 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
 
   const chips = byWeight
     ? [
-        ...(food.servingGrams ? [{ label: `1 porción · ${formatNumber(food.servingGrams)} ${u}`, v: food.servingGrams }] : []),
+        ...(food.servingGrams ? [{ label: `${food.servingName ?? "1 porción"} · ${formatNumber(food.servingGrams)} ${u}`, v: food.servingGrams }] : []),
         { label: `50 ${u}`, v: 50 },
         { label: `100 ${u}`, v: 100 },
         { label: `150 ${u}`, v: 150 },
@@ -70,6 +70,9 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
           per100g: food.per100g,
           serving: food.serving,
           servingLabel: food.servingLabel,
+          servingName: food.servingName,
+          servingGrams: food.servingGrams,
+          fdcId: food.fdcId,
           isLiquid: food.isLiquid,
           lastGrams: byWeight ? n : undefined,
         },
@@ -154,6 +157,10 @@ export function PortionForm({ food, date, meal: initialMeal, formId, onSaved }: 
       {food.source === "search" || food.source === "barcode" ? (
         <p className="px-1 text-[12px] text-muted">
           Datos de Open Food Facts (colaborativos, licencia ODbL). Revisa la etiqueta si algo no cuadra.
+        </p>
+      ) : food.source === "generic" ? (
+        <p className="px-1 text-[12px] text-muted">
+          Valores de referencia de USDA FoodData Central{food.fdcId ? ` (n.º ${food.fdcId})` : ""}. Pueden variar según la variedad y la preparación.
         </p>
       ) : null}
 

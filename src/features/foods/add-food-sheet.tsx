@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Barcode, ChevronLeft, Globe, Loader2, PenLine, Search, Star, X } from "lucide-react";
+import { Barcode, ChevronLeft, Globe, Leaf, Loader2, PenLine, Search, Star, X } from "lucide-react";
 import { Sheet, SheetAction } from "@/components/ui/sheet";
 import { useSavedFoods } from "@/lib/db/hooks";
 import { candidateFromItem, type FoodCandidate } from "@/lib/nutrition/portion";
+import { genericCandidate, searchGeneric } from "@/lib/nutrition/generic-foods";
 import { cn, formatNumber } from "@/lib/utils";
 import type { MealType } from "@/types/nutrition";
 import { PortionForm } from "./portion-form";
@@ -40,6 +41,7 @@ export function AddFoodSheet({ date, meal, onClose, onCreateManual }: AddFoodShe
     if (!q) return list.slice(0, 30);
     return list.filter((f) => normalize(`${f.name} ${f.brand ?? ""}`).includes(q)).slice(0, 30);
   }, [saved, q, tab]);
+  const generic = useMemo(() => (q.length >= 2 ? searchGeneric(q) : []), [q]);
 
   async function runOnlineSearch(e?: React.FormEvent) {
     e?.preventDefault();
@@ -161,6 +163,15 @@ export function AddFoodSheet({ date, meal, onClose, onCreateManual }: AddFoodShe
         )}
       </section>
 
+      {generic.length > 0 && (
+        <section className="mt-5">
+          <h3 className="mb-2 flex items-center gap-1.5 px-1 text-[13px] font-semibold text-muted">
+            <Leaf className="size-3.5" /> Alimentos genéricos
+          </h3>
+          <FoodList items={generic.map((g) => ({ c: genericCandidate(g) }))} onPick={setSelected} />
+        </section>
+      )}
+
       {query.trim().length >= 2 && (
         <section className="mt-5">
           <h3 className="mb-2 flex items-center gap-1.5 px-1 text-[13px] font-semibold text-muted">
@@ -204,7 +215,7 @@ function FoodList({
       {items.map(({ c }) => {
         const base = c.per100g ?? c.serving;
         return (
-          <li key={c.key ?? c.barcode ?? c.name}>
+          <li key={c.key ?? c.barcode ?? (c.fdcId ? `usda:${c.fdcId}` : c.name)}>
             <button
               type="button"
               onClick={() => onPick(c)}
@@ -216,7 +227,7 @@ function FoodList({
                   <span className="truncate">{c.name}</span>
                 </p>
                 <p className="truncate text-[12px] text-muted">
-                  {[c.brand, c.per100g ? (c.isLiquid ? "por 100 ml" : "por 100 g") : c.servingLabel || "1 porción"].filter(Boolean).join(" · ")}
+                  {[c.brand, c.per100g ? (c.isLiquid ? "por 100 ml" : "por 100 g") : c.servingLabel || "1 porción", c.servingName && c.servingGrams ? `${c.servingName} = ${formatNumber(c.servingGrams)} g` : null].filter(Boolean).join(" · ")}
                 </p>
               </div>
               {base && (

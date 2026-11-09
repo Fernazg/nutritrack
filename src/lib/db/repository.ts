@@ -53,6 +53,9 @@ export interface FoodItemInput {
   per100g?: NutritionTotals;
   serving?: NutritionTotals;
   servingLabel?: string;
+  servingName?: string;
+  servingGrams?: number;
+  fdcId?: number;
   isLiquid?: boolean;
   lastGrams?: number;
   source: FoodItem["source"];

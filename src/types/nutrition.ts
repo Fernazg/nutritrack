@@ -1,7 +1,7 @@
 export type MealType = "desayuno" | "almuerzo" | "once" | "cena" | "colacion";
 
 /** Where a food entry came from. */
-export type EntrySource = "manual" | "photo" | "barcode" | "label" | "search";
+export type EntrySource = "manual" | "photo" | "barcode" | "label" | "search" | "generic";
 
 export interface Macros {
   protein: number; // g
@@ -40,6 +40,11 @@ export interface FoodItem {
   per100g?: NutritionTotals;
   serving?: NutritionTotals;
   servingLabel?: string;
+  /** Household measure for per-100 g foods, e.g. "1 taza" = 158 g. */
+  servingName?: string;
+  servingGrams?: number;
+  /** USDA FoodData Central id for generic foods (traceable source). */
+  fdcId?: number;
   /** Measured in ml instead of g (from the product label). */
   isLiquid?: boolean;
   /** Last grams used, to prefill next time. */

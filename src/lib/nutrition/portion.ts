@@ -11,6 +11,9 @@ export interface FoodCandidate {
   serving?: NutritionTotals;
   servingLabel?: string;
   servingGrams?: number;
+  /** Household measure name for servingGrams, e.g. "1 taza". */
+  servingName?: string;
+  fdcId?: number;
   lastGrams?: number;
   favorite?: boolean;
   /** Per-100 label data from Open Food Facts (not persisted). */
@@ -28,6 +31,9 @@ export function candidateFromItem(item: FoodItem): FoodCandidate {
     per100g: item.per100g,
     serving: item.serving,
     servingLabel: item.servingLabel,
+    servingGrams: item.servingGrams,
+    servingName: item.servingName,
+    fdcId: item.fdcId,
     lastGrams: item.lastGrams,
     isLiquid: item.isLiquid,
     favorite: item.favorite === 1,

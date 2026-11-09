@@ -188,6 +188,36 @@ try {
   check("actividad registrada (5 MET × 80 kg × 1 h = 400 kcal)", t.includes("Caminar rápido") && t.includes("400 kcal"));
   await shot("diario");
 
+  // 10b. Generic food (USDA) from the search
+  await nav("/diario/colacion");
+  await click("Agregar alimento");
+  await fill('input[aria-label="Buscar alimento"]', "arroz");
+  t = await text();
+  check("búsqueda muestra alimentos genéricos", t.includes("Alimentos genéricos") && t.includes("Arroz blanco cocido"));
+  await clickContaining("[role=dialog] li button", "Arroz blanco cocido");
+  await click("1 taza · 158 g");
+  t = await ev(`document.querySelector('[role=dialog]').innerText`);
+  check("genérico: 1 taza de arroz = 205 kcal, fuente USDA", t.includes("205") && t.includes("USDA"));
+  await submitForm("#portion-form");
+  t = await text();
+  check("genérico registrado en la colación", t.includes("Arroz blanco cocido") && t.includes("158 g"));
+
+  // 10c. Progress: weight trend + monthly calendar (weights seeded over 3 weeks)
+  await ev(`(async()=>{ const db = await new Promise(res=>{const q=indexedDB.open('nutritrack'); q.onsuccess=()=>res(q.result)}); const tx=db.transaction('weightEntries','readwrite'); const st=tx.objectStore('weightEntries'); const d=new Date(); for (let i=21;i>=1;i-=2){ const x=new Date(d.getFullYear(), d.getMonth(), d.getDate()-i); const iso=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); st.add({date: iso, weightKg: 82 - (21-i)*0.07 + (i%4?0.4:-0.3), createdAt: Date.now()}); } await new Promise(r=>tx.oncomplete=r); db.close(); return true; })()`);
+  await nav("/progreso");
+  t = await text();
+  check("gráfico de peso muestra tendencia y ritmo semanal", /Tendencia \d+,\d kg · [−+]?\d+,\d kg\/sem/.test(t));
+  await click("1 mes");
+  check("calendario mensual visible", t.includes("Calorías del mes"));
+  const todayDay = new Date().getDate();
+  const cell = await ev(`(document.querySelector('[aria-label^="${todayDay}: "]')||{}).getAttribute?.('aria-label')`);
+  check(`calendario muestra las kcal de hoy (${cell})`, /\d kcal$/.test(cell ?? ""));
+  const month0 = await ev(`[...document.querySelectorAll('p')].find(p=>/\\d{4}$/.test(p.innerText))?.innerText`);
+  await click("Mes anterior");
+  const month1 = await ev(`[...document.querySelectorAll('p')].find(p=>/\\d{4}$/.test(p.innerText))?.innerText`);
+  check(`navegación de meses (${month0} → ${month1})`, !!month0 && !!month1 && month0 !== month1);
+  await shot("progreso");
+
   // 11. Suggestions from saved foods on dashboard
   await nav("/");
   t = await text();

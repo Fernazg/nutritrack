@@ -12,6 +12,7 @@ import type { WeightEntry } from "@/types/nutrition";
 import { WeightChart } from "./weight-chart";
 import { WeightSheet } from "./weight-sheet";
 import { WeeklyStats } from "./weekly-stats";
+import { MonthlyCalories } from "./monthly-calories";
 import { weightChange } from "@/lib/nutrition/stats";
 
 type Editing = { kind: "new" } | { kind: "edit"; entry: WeightEntry } | null;
@@ -82,6 +83,8 @@ export function Progress() {
       )}
 
       {today && <WeeklyStats today={today} goals={goals} />}
+
+      {today && <MonthlyCalories today={today} goals={goals} />}
 
       <section>
         <SectionTitle>Evolución del peso</SectionTitle>

@@ -8,8 +8,9 @@ PWA personal de nutrición, optimizada para iPhone. Sin cuentas: todos los datos
 - Tailwind CSS 4
 - Dexie (IndexedDB) para almacenamiento local
 - lucide-react para íconos
-- @zxing/browser para leer códigos de barras
+- zxing-wasm (zxing-cpp en WebAssembly, MIT) para leer códigos de barras; el .wasm se sirve desde /public/zxing
 - Open Food Facts (datos abiertos, ODbL) para productos envasados
+- USDA FoodData Central SR Legacy (dominio público) para alimentos genéricos: `data/generic-foods.source.json` (lista curada con el n.º FDC de cada alimento) → `node scripts/build-generic-foods.mjs <carpeta CSV>` genera `src/lib/nutrition/generic-foods.json`. Ningún valor nutricional se escribe a mano.
 - Vitest para pruebas unitarias
 
 ## Desarrollo
@@ -21,6 +22,7 @@ npm run build    # compilación de producción
 npm run lint
 npm test         # pruebas unitarias (Vitest)
 npm run test:e2e -- .e2e http://localhost:3123   # prueba de punta a punta (Edge, iPhone)
+npm run test:e2e:barcode -- .e2e http://localhost:3123   # lector de códigos (cámara falsa + foto)
 ```
 
 ## Estructura

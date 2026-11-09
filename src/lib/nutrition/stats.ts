@@ -78,3 +78,66 @@ export function weightChange(
   if (!base) return null;
   return Math.round((last.weightKg - base.weightKg) * 10) / 10;
 }
+
+const DAY_MS = 86_400_000;
+const dayNumber = (iso: string) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return Math.round(Date.UTC(y, m - 1, d) / DAY_MS);
+};
+
+export interface TrendPoint {
+  date: string;
+  weightKg: number;
+  /** Smoothed weight (exponential moving average). */
+  trend: number;
+}
+
+/**
+ * Smoothed weight trend: exponential moving average with 10 % daily
+ * smoothing, adjusted for gaps between weigh-ins (a gap of n days weighs the
+ * new value as 1 − 0.9ⁿ). Daily water/food swings fade; the real direction stays.
+ */
+export function weightTrend(
+  entries: readonly { date: string; weightKg: number }[],
+  dailyAlpha = 0.1,
+): TrendPoint[] {
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const out: TrendPoint[] = [];
+  for (const e of sorted) {
+    const prev = out.at(-1);
+    let trend = e.weightKg;
+    if (prev) {
+      const gap = Math.max(1, dayNumber(e.date) - dayNumber(prev.date));
+      const w = 1 - Math.pow(1 - dailyAlpha, gap);
+      trend = prev.trend + w * (e.weightKg - prev.trend);
+    }
+    out.push({ date: e.date, weightKg: e.weightKg, trend: Math.round(trend * 100) / 100 });
+  }
+  return out;
+}
+
+/**
+ * Weekly rate of change of the trend (kg/week), comparing the last point with
+ * the latest one at least `minDays` earlier. null without enough history.
+ */
+export function trendRatePerWeek(points: readonly TrendPoint[], minDays = 7): number | null {
+  const last = points.at(-1);
+  if (!last) return null;
+  const end = dayNumber(last.date);
+  const base = [...points].reverse().find((p) => end - dayNumber(p.date) >= minDays);
+  if (!base) return null;
+  const days = end - dayNumber(base.date);
+  return Math.round(((last.trend - base.trend) / days) * 7 * 10) / 10;
+}
+
+export interface MonthSummary {
+  daysLogged: number;
+  avgCalories: number;
+  onTarget: number;
+}
+
+/** Summary for a set of days (e.g. a calendar month), counting logged days only. */
+export function summarizeDays(days: readonly DayTotals[], goal: number): MonthSummary {
+  const avg = averageLogged(days);
+  return { daysLogged: avg.daysLogged, avgCalories: avg.calories, onTarget: daysOnTarget(days, goal) };
+}
