@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NutriTrack
 
-## Getting Started
+PWA personal de nutrición, optimizada para iPhone. Sin cuentas: todos los datos viven en el dispositivo (IndexedDB).
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router, Cache Components) + React 19 + TypeScript
+- Tailwind CSS 4
+- Dexie (IndexedDB) para almacenamiento local
+- lucide-react para íconos
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # compilación de producción
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estructura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/                 Rutas (App Router), manifest, íconos
+    (tabs)/            Pantallas con navegación inferior
+  components/
+    layout/            Navegación inferior
+    pwa/               Service worker e ícono
+    ui/                Componentes reutilizables (Card, Sheet, Field…)
+  features/            Módulos por funcionalidad
+    dashboard/  meals/  progress/  scanner/  settings/
+  lib/
+    db/                Esquema Dexie, hooks de lectura y repositorio de escritura
+    nutrition/         Comidas, metas por defecto, totales
+    server/            Código solo de servidor (claves API)
+  types/               Tipos del dominio
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variables de entorno
 
-## Learn More
+Copia `.env.example` a `.env.local`. Las claves API son **solo de servidor**: nunca uses el prefijo `NEXT_PUBLIC_` para ellas. En Vercel se configuran en *Settings → Environment Variables*.
 
-To learn more about Next.js, take a look at the following resources:
+## Despliegue
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Conectado a Vercel: cada push a `main` publica una nueva versión automáticamente.
