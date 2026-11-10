@@ -56,8 +56,10 @@ export async function generateContent(
   // Free-tier fallback when the main model is overloaded (503).
   const fallback = process.env.AI_FALLBACK_MODEL || "gemini-flash-lite-latest";
   const started = Date.now();
-  const call = (lowThinking: boolean, model: string) =>
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+  const deadline = started + timeoutMs;
+  const trace: string[] = [];
+  const call = (thinking: boolean, m: string, until: number) =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({
@@ -67,25 +69,38 @@ export async function generateContent(
           // Thinking models count reasoning tokens here too; leave room for the answer.
           maxOutputTokens: 8192,
           ...(json ? { responseMimeType: "application/json" } : {}),
-          // Long default reasoning makes responses take 45 s+; these tasks don't need it.
-          ...(lowThinking ? { thinkingConfig: { thinkingLevel: "low" } } : {}),
+          // Default reasoning makes answers take 45 s+; these tasks don't need it.
+          ...(thinking ? { thinkingConfig: { thinkingLevel: "minimal" } } : {}),
         },
       }),
-      signal: AbortSignal.timeout(Math.max(1000, timeoutMs - (Date.now() - started))),
+      signal: AbortSignal.timeout(Math.max(1000, until - Date.now())),
     });
-  let res: Response;
-  try {
-    const attempt = async (m: string) => {
-      const r = await call(true, m);
-      if (r.status !== 400) return r;
-      // Older models don't accept thinkingLevel: retry once without it.
-      const body = await r.clone().text().catch(() => "");
-      return /thinking/i.test(body) ? call(false, m) : r;
-    };
-    res = await attempt(model);
-    if (res.status === 503 && fallback && fallback !== model) res = await attempt(fallback);
-  } catch {
-    throw new AiError("La IA tardó demasiado en responder. Inténtalo de nuevo.", 504);
+  /** One model; null when it timed out. */
+  const attempt = async (m: string, until: number): Promise<Response | null> => {
+    const t0 = Date.now();
+    try {
+      let r = await call(true, m, until);
+      if (r.status === 400) {
+        // Models that don't accept this thinking level: retry once without it.
+        const body = await r.clone().text().catch(() => "");
+        if (/thinking/i.test(body)) r = await call(false, m, until);
+      }
+      trace.push(`${m}: ${r.status} en ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+      return r;
+    } catch {
+      trace.push(`${m}: sin respuesta en ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+      return null;
+    }
+  };
+  const canFallback = !!fallback && fallback !== model;
+  // The main model gets ~55% of the time so the lighter one still has a chance.
+  let res = await attempt(model, canFallback ? started + timeoutMs * 0.55 : deadline);
+  if (canFallback && (!res || res.status === 503 || res.status === 500)) {
+    res = (await attempt(fallback, deadline)) ?? res;
+  }
+  console.info("gemini", trace.join(" | "));
+  if (!res) {
+    throw new AiError(`La IA tardó demasiado en responder. Inténtalo de nuevo. [${trace.join("; ")}]`, 504);
   }
   if (res.status === 429) throw new AiError("Se alcanzó el límite gratuito de la IA. Inténtalo más tarde.", 429);
   if (!res.ok) {
