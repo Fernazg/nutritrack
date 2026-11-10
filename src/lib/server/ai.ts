@@ -51,25 +51,32 @@ export async function generateContent(
   const key = process.env.AI_API_KEY;
   if (!key) throw new AiError("IA no configurada", 503);
   const model = process.env.AI_MODEL || "gemini-flash-latest";
+  const started = Date.now();
+  const call = (lowThinking: boolean) =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts }],
+        generationConfig: {
+          temperature,
+          // Thinking models count reasoning tokens here too; leave room for the answer.
+          maxOutputTokens: 8192,
+          ...(json ? { responseMimeType: "application/json" } : {}),
+          // Long default reasoning makes responses take 45 s+; these tasks don't need it.
+          ...(lowThinking ? { thinkingConfig: { thinkingLevel: "low" } } : {}),
+        },
+      }),
+      signal: AbortSignal.timeout(Math.max(1000, timeoutMs - (Date.now() - started))),
+    });
   let res: Response;
   try {
-    res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts }],
-          generationConfig: {
-            temperature,
-            // Thinking models count reasoning tokens here too; leave room for the answer.
-            maxOutputTokens: 8192,
-            ...(json ? { responseMimeType: "application/json" } : {}),
-          },
-        }),
-        signal: AbortSignal.timeout(timeoutMs),
-      },
-    );
+    res = await call(true);
+    if (res.status === 400) {
+      // Older models don't accept thinkingLevel: retry once without it.
+      const body = await res.clone().text().catch(() => "");
+      if (/thinking/i.test(body)) res = await call(false);
+    }
   } catch {
     throw new AiError("La IA tardó demasiado en responder. Inténtalo de nuevo.", 504);
   }

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   try {
     const text = await generateContent(
       [{ inlineData: { mimeType, data: image } }, { text: buildPhotoPrompt() }],
-      { json: true, temperature: 0.2, timeoutMs: 45000 },
+      { json: true, temperature: 0.2, timeoutMs: 55000 },
     );
     let parsed: unknown;
     try {
