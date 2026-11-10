@@ -14,6 +14,8 @@ import { timingSafeEqual } from "node:crypto";
  *                     can spend your quota through the public URL
  * Optional:
  *   AI_MODEL          defaults to "gemini-flash-latest"
+ *   AI_FALLBACK_MODEL used when the main model answers 503 (default
+ *                     "gemini-flash-lite-latest")
  */
 
 export function aiConfigured(): boolean {
@@ -51,8 +53,10 @@ export async function generateContent(
   const key = process.env.AI_API_KEY;
   if (!key) throw new AiError("IA no configurada", 503);
   const model = process.env.AI_MODEL || "gemini-flash-latest";
+  // Free-tier fallback when the main model is overloaded (503).
+  const fallback = process.env.AI_FALLBACK_MODEL || "gemini-flash-lite-latest";
   const started = Date.now();
-  const call = (lowThinking: boolean) =>
+  const call = (lowThinking: boolean, model: string) =>
     fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
@@ -71,12 +75,15 @@ export async function generateContent(
     });
   let res: Response;
   try {
-    res = await call(true);
-    if (res.status === 400) {
+    const attempt = async (m: string) => {
+      const r = await call(true, m);
+      if (r.status !== 400) return r;
       // Older models don't accept thinkingLevel: retry once without it.
-      const body = await res.clone().text().catch(() => "");
-      if (/thinking/i.test(body)) res = await call(false);
-    }
+      const body = await r.clone().text().catch(() => "");
+      return /thinking/i.test(body) ? call(false, m) : r;
+    };
+    res = await attempt(model);
+    if (res.status === 503 && fallback && fallback !== model) res = await attempt(fallback);
   } catch {
     throw new AiError("La IA tardó demasiado en responder. Inténtalo de nuevo.", 504);
   }
@@ -96,6 +103,7 @@ export async function generateContent(
       /api key not valid|API_KEY_INVALID/i.test(reason) ? "La clave AI_API_KEY no es válida (revisa que esté completa en Vercel)."
       : res.status === 404 ? "El modelo de IA configurado no está disponible."
       : res.status === 403 ? "La clave no tiene permiso para usar Gemini."
+      : res.status === 503 ? "La IA de Google está saturada en este momento. Inténtalo en unos minutos."
       : "El servicio de IA no respondió correctamente.";
     throw new AiError(`${hint} [Gemini ${res.status}${reason ? `: ${reason}` : ""}]`, 502);
   }
