@@ -13,9 +13,9 @@ import { timingSafeEqual } from "node:crypto";
  *   APP_ACCESS_TOKEN  long random secret; the app sends it so nobody else
  *                     can spend your quota through the public URL
  * Optional:
- *   AI_MODEL          defaults to "gemini-flash-latest"
+ *   AI_MODEL          defaults to "gemini-flash-lite-latest"
  *   AI_FALLBACK_MODEL used when the main model answers 503 (default
- *                     "gemini-flash-lite-latest")
+ *                     "gemini-flash-latest")
  */
 
 export function aiConfigured(): boolean {
@@ -52,9 +52,10 @@ export async function generateContent(
 ): Promise<string> {
   const key = process.env.AI_API_KEY;
   if (!key) throw new AiError("IA no configurada", 503);
-  const model = process.env.AI_MODEL || "gemini-flash-latest";
+  // Lite answers in ~1–2 s; the full Flash often stalls ~30 s on the free tier (verified 2026-11-09).
+  const model = process.env.AI_MODEL || "gemini-flash-lite-latest";
   // Free-tier fallback when the main model is overloaded (503).
-  const fallback = process.env.AI_FALLBACK_MODEL || "gemini-flash-lite-latest";
+  const fallback = process.env.AI_FALLBACK_MODEL || "gemini-flash-latest";
   const started = Date.now();
   const deadline = started + timeoutMs;
   const trace: string[] = [];

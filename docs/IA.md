@@ -11,7 +11,7 @@ NutriTrack funciona completo sin IA. La IA activa el **análisis de fotos de com
 3. En Vercel → proyecto `nutritrack` → **Settings → Environment Variables**, agrega:
    - `AI_API_KEY` = la clave de AI Studio
    - `APP_ACCESS_TOKEN` = el secreto del paso 2
-   - (opcional) `AI_MODEL`: déjalo vacío; por defecto usa `gemini-flash-latest`, el alias que apunta siempre al Flash vigente (Google retiró `gemini-2.5-flash` para cuentas nuevas)
+   - (opcional) `AI_MODEL`: déjalo vacío; por defecto usa `gemini-flash-lite-latest` (responde en 1–2 s) y, si está saturado, `gemini-flash-latest` (Google retiró `gemini-2.5-flash` para cuentas nuevas)
 4. Vuelve a desplegar (Deployments → Redeploy).
 5. En la app: **Ajustes → Inteligencia artificial** debe decir "Configurada".
    Pega ahí el mismo `APP_ACCESS_TOKEN` y guárdalo. Aparecerá la tarjeta
