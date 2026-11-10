@@ -13,7 +13,7 @@ import { timingSafeEqual } from "node:crypto";
  *   APP_ACCESS_TOKEN  long random secret; the app sends it so nobody else
  *                     can spend your quota through the public URL
  * Optional:
- *   AI_MODEL          defaults to "gemini-2.5-flash"
+ *   AI_MODEL          defaults to "gemini-flash-latest"
  */
 
 export function aiConfigured(): boolean {
@@ -50,7 +50,7 @@ export async function generateContent(
 ): Promise<string> {
   const key = process.env.AI_API_KEY;
   if (!key) throw new AiError("IA no configurada", 503);
-  const model = process.env.AI_MODEL || "gemini-2.5-flash";
+  const model = process.env.AI_MODEL || "gemini-flash-latest";
   let res: Response;
   try {
     res = await fetch(
