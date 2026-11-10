@@ -28,10 +28,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Imagen inválida o demasiado grande" }, { status: 400 });
   }
 
+  let trace: string[] = [];
   try {
     const text = await generateContent(
       [{ inlineData: { mimeType, data: image } }, { text: buildPhotoPrompt() }],
-      { json: true, temperature: 0.2, timeoutMs: 55000 },
+      { json: true, temperature: 0.2, timeoutMs: 55000, onTrace: (t) => (trace = t) },
     );
     let parsed: unknown;
     try {
@@ -39,7 +40,8 @@ export async function POST(request: Request) {
     } catch {
       throw new AiError("La IA devolvió una respuesta ilegible. Inténtalo de nuevo.", 502);
     }
-    return NextResponse.json({ ...parsePhotoResponse(parsed), estimated: true });
+    // trace: which model answered and how long it took (no secrets), for diagnosis.
+    return NextResponse.json({ ...parsePhotoResponse(parsed), estimated: true, trace });
   } catch (err) {
     const status = err instanceof AiError ? err.status : 502;
     const message = err instanceof AiError ? err.message : "No se pudo analizar la foto.";

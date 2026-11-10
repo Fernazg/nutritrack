@@ -48,7 +48,7 @@ export async function generateText(prompt: string, { json = false } = {}): Promi
 /** Calls Gemini with text and/or inline images (base64). */
 export async function generateContent(
   parts: AiPart[],
-  { json = false, temperature = 0.6, timeoutMs = 25000 } = {},
+  { json = false, temperature = 0.6, timeoutMs = 25000, onTrace }: { json?: boolean; temperature?: number; timeoutMs?: number; onTrace?: (t: string[]) => void } = {},
 ): Promise<string> {
   const key = process.env.AI_API_KEY;
   if (!key) throw new AiError("IA no configurada", 503);
@@ -99,6 +99,7 @@ export async function generateContent(
     res = (await attempt(fallback, deadline)) ?? res;
   }
   console.info("gemini", trace.join(" | "));
+  onTrace?.(trace);
   if (!res) {
     throw new AiError(`La IA tardó demasiado en responder. Inténtalo de nuevo. [${trace.join("; ")}]`, 504);
   }
