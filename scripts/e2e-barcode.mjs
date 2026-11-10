@@ -2,7 +2,7 @@
 //  1) live camera: Edge's fake camera streams a video of the barcode;
 //  2) photo: the same barcode as a PNG through "Tomar foto del código".
 // Usage: node scripts/e2e-barcode.mjs [outDir=.e2e] [baseUrl=http://localhost:3123]
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
@@ -125,7 +125,9 @@ try {
   console.log(results.join("\n"));
   if (errors.length) console.log("Errores de página:\n" + errors.join("\n"));
   ws.close();
-  proc.kill();
+  // Edge spawns child processes that survive proc.kill(): end the whole tree.
+  if (process.platform === "win32") spawnSync("taskkill", ["/PID", String(proc.pid), "/T", "/F"], { stdio: "ignore" });
+  else proc.kill();
   await sleep(500);
   try { rmSync(profile, { recursive: true, force: true }); } catch {}
   process.exit(results.some((r) => r.startsWith("FAIL")) ? 1 : 0);

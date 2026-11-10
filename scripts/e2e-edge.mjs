@@ -1,7 +1,7 @@
 // End-to-end smoke test (Microsoft Edge headless via DevTools Protocol, iPhone 390 px).
 // Usage: node scripts/e2e-edge.mjs [outDir=.e2e] [baseUrl=http://localhost:3123] [light|dark]
 // Requires a running build (npm run build && npx next start -p 3123) and internet for Open Food Facts.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { writeFileSync, rmSync } from "node:fs";
 
 const outDir = process.argv[2] ?? ".e2e";
@@ -234,4 +234,6 @@ try {
 check("sin errores en consola " + JSON.stringify(errors.slice(0, 2)).slice(0, 400), errors.length === 0);
 console.log(results.join("\n"));
 ws.close();
-proc.kill();
+// Edge spawns child processes that survive proc.kill(): end the whole tree.
+if (process.platform === "win32") spawnSync("taskkill", ["/PID", String(proc.pid), "/T", "/F"], { stdio: "ignore" });
+else proc.kill();
