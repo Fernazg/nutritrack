@@ -75,8 +75,22 @@ export async function generateContent(
   }
   if (res.status === 429) throw new AiError("Se alcanzó el límite gratuito de la IA. Inténtalo más tarde.", 429);
   if (!res.ok) {
-    console.error("gemini", res.status, (await res.text().catch(() => "")).slice(0, 300));
-    throw new AiError("El servicio de IA no respondió correctamente.", 502);
+    const raw = await res.text().catch(() => "");
+    console.error("gemini", res.status, raw.slice(0, 300));
+    let reason = "";
+    try {
+      reason = String((JSON.parse(raw) as { error?: { message?: string } }).error?.message ?? "");
+    } catch {
+      /* not JSON */
+    }
+    // Google's error messages never include the key; strip anything key-like just in case.
+    reason = reason.replace(/AIza[0-9A-Za-z_-]{20,}/g, "…").slice(0, 160);
+    const hint =
+      /api key not valid|API_KEY_INVALID/i.test(reason) ? "La clave AI_API_KEY no es válida (revisa que esté completa en Vercel)."
+      : res.status === 404 ? "El modelo de IA configurado no está disponible."
+      : res.status === 403 ? "La clave no tiene permiso para usar Gemini."
+      : "El servicio de IA no respondió correctamente.";
+    throw new AiError(`${hint} [Gemini ${res.status}${reason ? `: ${reason}` : ""}]`, 502);
   }
   const data = (await res.json()) as {
     candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[];
