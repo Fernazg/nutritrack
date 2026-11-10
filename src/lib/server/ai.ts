@@ -54,7 +54,7 @@ export async function generateContent(
   if (!key) throw new AiError("IA no configurada", 503);
   // Lite answers in ~1–2 s; the full Flash often stalls ~30 s on the free tier (verified 2026-11-09).
   const model = process.env.AI_MODEL || "gemini-flash-lite-latest";
-  // Free-tier fallback when the main model is overloaded (503).
+  // Fallback when the main model is overloaded (503/500), out of free quota (429) or too slow.
   const fallback = process.env.AI_FALLBACK_MODEL || "gemini-flash-latest";
   const started = Date.now();
   const deadline = started + timeoutMs;
@@ -94,9 +94,9 @@ export async function generateContent(
     }
   };
   const canFallback = !!fallback && fallback !== model;
-  // The main model gets ~55% of the time so the lighter one still has a chance.
+  // The main model gets ~55% of the time so the fallback still has a chance.
   let res = await attempt(model, canFallback ? started + timeoutMs * 0.55 : deadline);
-  if (canFallback && (!res || res.status === 503 || res.status === 500)) {
+  if (canFallback && (!res || res.status === 503 || res.status === 500 || res.status === 429)) {
     res = (await attempt(fallback, deadline)) ?? res;
   }
   console.info("gemini", trace.join(" | "));
